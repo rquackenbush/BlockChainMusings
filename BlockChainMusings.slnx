@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BlockChain.Core.Tests/BlockChain.Core.Tests.csproj" />
+  <Project Path="BlockChain.Core/BlockChain.Core.csproj" />
+</Solution>
