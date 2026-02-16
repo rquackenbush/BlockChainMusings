@@ -1,4 +1,6 @@
-﻿namespace BlockChain.Core;
+﻿using System.Collections.Immutable;
+
+namespace BlockChain.Core;
 
 public static class Extensions
 {
@@ -12,15 +14,7 @@ public static class Extensions
         {
             if (previousBlock != null)
             {
-                var request = new CalculateHashRequest
-                {
-                    Id = block.Id,
-                    Data = block.Data,
-                    PreviousHash = previousBlock.Hash,
-                    Timestamp = block.Timestamp
-                };
-
-                var calculatedHash = hashCalculator.CalculateHash(request);
+                var calculatedHash = block.CalculateHash(previousBlock.Hash, hashCalculator);
 
                 if (!block.Hash.SequenceEqual(calculatedHash)) 
                 {
@@ -31,5 +25,10 @@ public static class Extensions
             previousBlock = block;
             index++;
         }
+    }
+
+    public static byte[] CalculateHash(this BlockBase block, ImmutableArray<byte> previousHash, HashCalculator hashCalculator)
+    {
+        return hashCalculator.CalculateHash(block, previousHash);
     }
 }

@@ -1,26 +1,26 @@
-﻿using System.Security.Cryptography;
-using System.Text;
+﻿using System.Collections.Immutable;
 
 namespace BlockChain.Core;
 
+/// <summary>
+/// Trivial implementation of a block chain.
+/// </summary>
 public class BlockChain
 {
     private readonly List<Block> _blocks = [];
 
-    private static readonly SHA256 _sha = SHA256.Create();
+    private readonly HashCalculator _hashCalculator;
 
-    private static readonly HashCalculator _hashCalculator = new HashCalculator(_sha);
-
-    public BlockChain()
+    public BlockChain(HashCalculator hashCalculator)
     {
-        var data = Encoding.UTF8.GetBytes("Gensis Block");
+        _hashCalculator = hashCalculator;
 
         //Add genesis block
-        _blocks.Add(new Block 
-        { 
+        _blocks.Add(new Block
+        {
             Id = Guid.Empty,
-            Data = data,
-            Hash = _sha.ComputeHash(data.ToArray()),
+            Data = Array.Empty<byte>().ToImmutableArray(),
+            Hash = new byte[_hashCalculator.HashAlgorithm.HashSize].ToImmutableArray(),
             Timestamp = DateTime.UtcNow
         });
     }
@@ -32,21 +32,20 @@ public class BlockChain
         var timestamp = DateTime.UtcNow;
         var id = Guid.NewGuid();
 
-        var calcRequest = new CalculateHashRequest
+        var calcRequest = new BlockBase
         {
             Id = id,
-            Data = data,
-            PreviousHash = previousBlock.Hash,
+            Data = data.ToImmutableArray(),
             Timestamp = timestamp
         };
 
-        var hash = _hashCalculator.CalculateHash(calcRequest);
+        var hash = _hashCalculator.CalculateHash(calcRequest, previousBlock.Hash);
 
         var block = new Block
         {
             Id = id,
-            Data = data,
-            Hash = hash,
+            Data = data.ToImmutableArray(),
+            Hash = hash.ToImmutableArray(),
             Timestamp = timestamp
         };
 
@@ -54,11 +53,6 @@ public class BlockChain
 
         return block;
 
-    }
-
-    public byte[] CalculateHash(Guid id, byte[] data, DateTime timetamp, byte[] previousHash)
-    {
-        throw new NotImplementedException();
     }
 
     public IEnumerable<Block> Blocks => _blocks;

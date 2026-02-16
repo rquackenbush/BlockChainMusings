@@ -6,12 +6,27 @@ namespace BlockChain.Core.Tests;
 
 public class Tests(ITestOutputHelper output)
 {
+    private readonly HashCalculator _hashCalculator = new HashCalculator(SHA256.Create());
+
+    [Fact]
+    public void GenisisBlockShouldHaveEmptyHash()
+    {
+        var blockChain = new BlockChain(_hashCalculator);
+
+        var blocks = blockChain.Blocks
+            .ToArray();
+
+        blocks.Length.ShouldBe(1);
+
+        blocks[0].Hash.ShouldBe(new byte[_hashCalculator.HashAlgorithm.HashSize]);
+    }
+
     [Theory]
     [InlineData("foo")]
     [InlineData("asdfasfasfsdf")]
-    public void HappyPathTest(string source)
+    public void AddBBlockTest(string source)
     {
-        var blockChain = new BlockChain();
+        var blockChain = new BlockChain(_hashCalculator);
 
         var data = Encoding.UTF8.GetBytes(source);
 
@@ -23,9 +38,9 @@ public class Tests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void Validate()
+    public void VerifyValidChain()
     {
-        var blockChain = new BlockChain();
+        var blockChain = new BlockChain(_hashCalculator);
 
         var sourceData = new string[]
         {
@@ -47,7 +62,7 @@ public class Tests(ITestOutputHelper output)
     [InlineData(2)]
     public void VerifyInvalidChain(int index)
     {
-        var blockChain = new BlockChain();
+        var blockChain = new BlockChain(_hashCalculator);
 
         var sourceData = new string[]
         {
@@ -63,27 +78,12 @@ public class Tests(ITestOutputHelper output)
 
         var blocks = blockChain.Blocks.ToArray();
 
-        blocks[index] = MutateBlock(blocks[index]);
+        blocks[index] = blocks[index].MutateData();
 
         var exception = Should.Throw<InvalidBlockException>(() => blocks.Verify(new HashCalculator(SHA256.Create())));
 
         exception.BlockIndex.ShouldBe(index);
 
         output.WriteLine(exception.Message);
-    }
-
-    private static Block MutateBlock(Block source)
-    {
-        var dataCopy = source.Data.ToArray();
-
-        dataCopy[0]++;
-
-        return new Block
-        {
-            Id = source.Id,
-            Data = dataCopy,
-            Hash = source.Hash,
-            Timestamp = source.Timestamp,
-        };
     }
 }

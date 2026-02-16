@@ -1,12 +1,14 @@
-﻿namespace BlockChain.Core;
+﻿//using System.Collections.Immutable;
 
-public record CalculateHashRequest
-{
-    public required Guid Id { get; init; }
+//namespace BlockChain.Core;
 
-    public required byte[] Data { get; init; }
+//public record CalculateHashRequest
+//{
+//    public required Guid Id { get; init; }
 
-    public required byte[] PreviousHash { get; init; }
+//    public required ImmutableArray<byte> Data { get; init; }
 
-    public required DateTime Timestamp { get; init; }
-}
+//    public required ImmutableArray<byte> PreviousHash { get; init; }
+
+//    public required DateTime Timestamp { get; init; }
+//}
